@@ -1,0 +1,26 @@
+{
+  "name": "mi-pwa-avanzada",
+  "version": "1.0.0",
+  "description": "Aplicación Web Progresiva optimizada para Lighthouse",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "test": "echo \"Ejecuta Lighthouse desde Chrome DevTools\" && exit 0"
+  },
+  "keywords": [
+    "pwa",
+    "lighthouse",
+    "performance",
+    "web-app",
+    "universidad"
+  ],
+  "author": "Krysta Fajardo",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.0"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}

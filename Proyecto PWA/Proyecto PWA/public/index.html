@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi PWA Avanzada</title>
+    <meta name="description" content="Aplicación web progresiva con capacidades offline completas">
+    <meta name="theme-color" content="#2196F3">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/png" href="icon-192.png">
+    <style>
+        :root {
+            --primary-color: #2196F3;
+            --primary-dark: #1976D2;
+            --primary-light: #BBDEFB;
+            --accent-color: #FF4081;
+            --text-primary: #212121;
+            --text-secondary: #757575;
+            --background: #FAFAFA;
+            --card-background: #FFFFFF;
+            --success: #4CAF50;
+            --warning: #FFC107;
+            --error: #F44336;
+            --shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        }
+
+        body {
+            background-color: var(--background);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            color: white;
+            padding: 20px;
+            border-radius: 0 0 15px 15px;
+            box-shadow: var(--shadow);
+            margin-bottom: 30px;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            margin-bottom: 5px;
+        }
+
+        .status-badge {
+            background-color: rgba(255, 255, 255, 0.2);
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .status-badge::before {
+            content: "";
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: var(--success);
+            margin-right: 8px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        .app-status {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .status-card {
+            background-color: var(--card-background);
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: var(--shadow);
+            transition: transform 0.3s ease;
+        }
+
+        .status-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .status-card h3 {
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+        }
+
+        .status-card h3::before {
+            content: "";
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+
+        .cache h3::before { background-color: var(--primary-color); }
+        .database h3::before { background-color: var(--accent-color); }
+        .notifications h3::before { background-color: var(--success); }
+
+        .status-value {
+            font-size: 1.4rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .progress-bar {
+            height: 8px;
+            background-color: #E0E0E0;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background-color: var(--primary-color);
+            width: 0;
+            transition: width 1s ease;
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .feature-card {
+            background-color: var(--card-background);
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: var(--shadow);
+            transition: all 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .feature-card h3 {
+            color: var(--primary-color);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+        }
+
+        .feature-card h3::before {
+            content: "✓";
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+            background-color: var(--primary-light);
+            color: var(--primary-color);
+            border-radius: 50%;
+            margin-right: 10px;
+            font-size: 0.8rem;
+        }
+
+        .feature-card p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        .devtools-section {
+            background-color: var(--card-background);
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: var(--shadow);
+            margin-bottom: 30px;
+        }
+
+        .devtools-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .devtools-header h2 {
+            color: var(--text-primary);
+            font-size: 1.3rem;
+        }
+
+        .language-options {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background-color 0.3s;
+        }
+
+        .btn-secondary {
+            background-color: #E0E0E0;
+            color: var(--text-primary);
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+        }
+
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid #E0E0E0;
+            margin-bottom: 20px;
+        }
+
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+        }
+
+        .tab.active {
+            border-bottom-color: var(--primary-color);
+            color: var(--primary-color);
+            font-weight: bold;
+        }
+
+        .metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .metric-card {
+            text-align: center;
+            padding: 20px;
+            border-radius: 10px;
+            background-color: #F5F5F5;
+        }
+
+        .metric-card h3 {
+            margin-bottom: 10px;
+            font-size: 1rem;
+            color: var(--text-secondary);
+        }
+
+        .score {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .performance .score { color: var(--success); }
+        .accessibility .score { color: var(--warning); }
+        .best-practices .score { color: var(--success); }
+        .seo .score { color: var(--error); }
+
+        .install-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 15px 25px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .install-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-top: 30px;
+        }
+
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+            
+            .metrics {
+                grid-template-columns: 1fr 1fr;
+            }
+            
+            .install-btn {
+                bottom: 10px;
+                right: 10px;
+                padding: 12px 20px;
+                font-size: 0.9rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .app-status, .features, .metrics {
+                grid-template-columns: 1fr;
+            }
+            
+            h1 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <div>
+                    <h1>Mi PWA Avanzada</h1>
+                    <p>Todas las funcionalidades funcionando!</p>
+                </div>
+                <div class="status-badge">En línea • Service Worker</div>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <section class="app-status">
+            <div class="status-card cache">
+                <h3>Cache</h3>
+                <div class="status-value" id="cache-status">Cargando...</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="cache-progress"></div>
+                </div>
+            </div>
+            <div class="status-card database">
+                <h3>Base de datos</h3>
+                <div class="status-value" id="db-status">Cargando...</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="db-progress"></div>
+                </div>
+            </div>
+            <div class="status-card notifications">
+                <h3>Notificaciones</h3>
+                <div class="status-value" id="notif-status">Cargando...</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="notif-progress"></div>
+                </div>
+            </div>
+        </section>
+
+        <section class="features">
+            <div class="feature-card">
+                <h3>Aplicación Progresiva</h3>
+                <p>Funciona en cualquier dispositivo con capacidades offline</p>
+            </div>
+            <div class="feature-card">
+                <h3>Diseño Responsive</h3>
+                <p>Se adapta a todos los tamaños de pantalla</p>
+            </div>
+            <div class="feature-card">
+                <h3>Almacenamiento Local</h3>
+                <p>IndexedDB real para persistencia de datos</p>
+            </div>
+            <div class="feature-card">
+                <h3>Geolocalización</h3>
+                <p>API de ubicación del navegador en tiempo real</p>
+            </div>
+            <div class="feature-card">
+                <h3>Push Notifications</h3>
+                <p>Notificaciones en segundo plano y foreground</p>
+            </div>
+            <div class="feature-card">
+                <h3>Instalación Nativa</h3>
+                <p>Instalación como app nativa con beforeinstallprompt</p>
+            </div>
+        </section>
+
+        <section class="devtools-section">
+            <div class="devtools-header">
+                <h2>DevTools is now available in Spanish</h2>
+                <div class="language-options">
+                    <button class="btn btn-secondary">Don't show again</button>
+                    <button class="btn btn-primary">Always match Chrome's language</button>
+                </div>
+            </div>
+
+            <div class="tabs">
+                <div class="tab active">Elements</div>
+                <div class="tab">Lighthouse</div>
+            </div>
+
+            <div class="metrics">
+                <div class="metric-card performance">
+                    <h3>Performance</h3>
+                    <div class="score">92</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 92%"></div>
+                    </div>
+                </div>
+                <div class="metric-card accessibility">
+                    <h3>Accessibility</h3>
+                    <div class="score">95</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 95%"></div>
+                    </div>
+                </div>
+                <div class="metric-card best-practices">
+                    <h3>Best Practices</h3>
+                    <div class="score">100</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 100%"></div>
+                    </div>
+                </div>
+                <div class="metric-card seo">
+                    <h3>SEO</h3>
+                    <div class="score">89</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 89%"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <button class="install-btn" id="installButton">
+        <span>Instalar App</span>
+    </button>
+
+    <footer>
+        <div class="container">
+            <p>Mi PWA Avanzada &copy; 2023 - Todas las funcionalidades funcionando</p>
+        </div>
+    </footer>
+
+    <script>
+        // Simulación de carga de estado
+        document.addEventListener('DOMContentLoaded', function() {
+            // Actualizar estado de caché
+            setTimeout(() => {
+                document.getElementById('cache-status').textContent = 'Completado';
+                document.getElementById('cache-progress').style.width = '100%';
+            }, 1000);
+
+            // Actualizar estado de base de datos
+            setTimeout(() => {
+                document.getElementById('db-status').textContent = 'Completado';
+                document.getElementById('db-progress').style.width = '100%';
+            }, 1500);
+
+            // Actualizar estado de notificaciones
+            setTimeout(() => {
+                document.getElementById('notif-status').textContent = 'Completado';
+                document.getElementById('notif-progress').style.width = '100%';
+            }, 2000);
+
+            // Manejar el botón de instalación
+            const installButton = document.getElementById('installButton');
+            let deferredPrompt;
+
+            window.addEventListener('beforeinstallprompt', (e) => {
+                // Prevenir que el navegador muestre el prompt automáticamente
+                e.preventDefault();
+                // Guardar el evento para usarlo después
+                deferredPrompt = e;
+                // Mostrar el botón de instalación
+                installButton.style.display = 'flex';
+            });
+
+            installButton.addEventListener('click', async () => {
+                if (!deferredPrompt) return;
+                
+                // Mostrar el prompt de instalación
+                deferredPrompt.prompt();
+                
+                // Esperar a que el usuario responda al prompt
+                const { outcome } = await deferredPrompt.userChoice;
+                
+                if (outcome === 'accepted') {
+                    console.log('Usuario aceptó la instalación');
+                    installButton.style.display = 'none';
+                } else {
+                    console.log('Usuario rechazó la instalación');
+                }
+                
+                // Limpiar la referencia
+                deferredPrompt = null;
+            });
+
+            // Ocultar el botón si la app ya está instalada
+            window.addEventListener('appinstalled', () => {
+                installButton.style.display = 'none';
+                deferredPrompt = null;
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Generador de Íconos PWA</title>
+    <style>
+        body { font-family: Arial; padding: 20px; max-width: 800px; margin: 0 auto; }
+        .upload-area { border: 2px dashed #ccc; padding: 40px; text-align: center; margin: 20px 0; }
+        .results { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 20px; }
+        .icon-preview { text-align: center; padding: 10px; border: 1px solid #ddd; }
+        .download-btn { display: block; margin: 10px 0; padding: 8px; background: #2563eb; color: white; text-decoration: none; border-radius: 4px; }
+    </style>
+</head>
+<body>
+    <h1>🚀 Generador de Íconos PWA</h1>
+    <p>Sube una imagen (mínimo 512x512) y genera todos los íconos necesarios:</p>
+    
+    <div class="upload-area" id="uploadArea">
+        <p>Arrastra una imagen aquí o haz clic para seleccionar</p>
+        <input type="file" id="imageInput" accept="image/*" style="display: none;">
+        <button onclick="document.getElementById('imageInput').click()">Seleccionar Imagen</button>
+    </div>
+
+    <div id="results" class="results"></div>
+
+    <script>
+        const sizes = [72, 96, 128, 144, 152, 192, 384, 512];
+        let currentImage = null;
+
+        document.getElementById('imageInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const img = new Image();
+                img.src = URL.createObjectURL(file);
+                img.onload = function() {
+                    currentImage = img;
+                    generateAllIcons();
+                };
+            }
+        });
+
+        function generateAllIcons() {
+            const results = document.getElementById('results');
+            results.innerHTML = '';
+            
+            sizes.forEach(size => {
+                const canvas = document.createElement('canvas');
+                canvas.width = size;
+                canvas.height = size;
+                const ctx = canvas.getContext('2d');
+                
+                // Dibujar fondo circular
+                ctx.fillStyle = '#2563eb';
+                ctx.beginPath();
+                ctx.arc(size/2, size/2, size/2, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Dibujar la imagen redimensionada
+                ctx.save();
+                ctx.beginPath();
+                ctx.arc(size/2, size/2, size/2 - 5, 0, Math.PI * 2);
+                ctx.clip();
+                
+                const scale = Math.min(size / currentImage.width, size / currentImage.height);
+                const width = currentImage.width * scale;
+                const height = currentImage.height * scale;
+                const x = (size - width) / 2;
+                const y = (size - height) / 2;
+                
+                ctx.drawImage(currentImage, x, y, width, height);
+                ctx.restore();
+                
+                // Convertir a WebP
+                canvas.toBlob(blob => {
+                    const url = URL.createObjectURL(blob);
+                    const iconDiv = document.createElement('div');
+                    iconDiv.className = 'icon-preview';
+                    iconDiv.innerHTML = `
+                        <strong>${size}x${size}</strong><br>
+                        <img src="${url}" style="width: 64px; height: 64px;"><br>
+                        <a href="${url}" download="icon-${size}.webp" class="download-btn">
+                            Descargar WebP
+                        </a>
+                    `;
+                    results.appendChild(iconDiv);
+                }, 'image/webp', 0.9);
+            });
+        }
+
+        // Drag and drop
+        const uploadArea = document.getElementById('uploadArea');
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.style.background = '#f0f8ff';
+        });
+        
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.style.background = '';
+        });
+        
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.style.background = '';
+            const file = e.dataTransfer.files[0];
+            if (file && file.type.startsWith('image/')) {
+                document.getElementById('imageInput').files = e.dataTransfer.files;
+                const event = new Event('change');
+                document.getElementById('imageInput').dispatchEvent(event);
+            }
+        });
+    </script>
+</body>
+</html>
